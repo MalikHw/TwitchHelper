@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "TwitchHelper",
+  "version": "1.0.0",
+  "description": "Monitor your favorite Twitch streamers and get live notifications",
+  "permissions": [
+    "notifications",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://www.twitch.tv/*",
+    "https://api.twitch.tv/*",
+    "wss://irc-ws.chat.twitch.tv:443/"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}

@@ -1,0 +1,44 @@
+name: Resize Icons
+
+on:
+  workflow_dispatch:
+
+jobs:
+  resize-icons:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install ImageMagick
+      run: sudo apt-get update && sudo apt-get install -y imagemagick
+    
+    - name: Resize icon to multiple sizes
+      run: |
+        # Check if icon.png exists
+        if [ ! -f "icon.png" ]; then
+          echo "Error: icon.png not found!"
+          exit 1
+        fi
+        
+        # Create resized versions
+        convert icon.png -resize 16x16 icon16.png
+        convert icon.png -resize 48x48 icon48.png
+        convert icon.png -resize 128x128 icon128.png
+        
+        # Delete original
+        rm icon.png
+        
+        echo "✅ Icons created: icon16.png, icon48.png, icon128.png"
+        echo "✅ Original icon.png deleted"
+    
+    - name: Commit and push changes
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add icon*.png
+        git add -u icon.png
+        git commit -m "Resize icon.png to multiple sizes (16x16, 48x48, 128x128)"
+        git push

@@ -1,0 +1,35 @@
+{
+  "manifest_version": 2,
+  "name": "TwitchHelper",
+  "version": "1.0.0",
+  "description": "Monitor your favorite Twitch streamers and get live notifications",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "twitchhelper@malikhw47.com",
+      "strict_min_version": "109.0"
+    }
+  },
+  "permissions": [
+    "notifications",
+    "storage",
+    "https://www.twitch.tv/*",
+    "https://api.twitch.tv/*",
+    "wss://irc-ws.chat.twitch.tv:443/"
+  ],
+  "browser_action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}

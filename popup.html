@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TwitchHelper</title>
+  <link rel="stylesheet" href="https://www.nerdfonts.com/assets/css/webfont.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 400px;
+      height: 600px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #0e0e10;
+      color: #efeff1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      background: #18181b;
+      padding: 15px;
+      border-bottom: 2px solid #9147ff;
+    }
+
+    .header h1 {
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #9147ff;
+    }
+
+    .add-streamer {
+      margin-top: 10px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .add-streamer input {
+      flex: 1;
+      padding: 8px 12px;
+      background: #0e0e10;
+      border: 1px solid #464649;
+      border-radius: 4px;
+      color: #efeff1;
+      font-size: 14px;
+    }
+
+    .add-streamer input:focus {
+      outline: none;
+      border-color: #9147ff;
+    }
+
+    .add-streamer button {
+      padding: 8px 16px;
+      background: #9147ff;
+      border: none;
+      border-radius: 4px;
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+
+    .add-streamer button:hover {
+      background: #772ce8;
+    }
+
+    .settings {
+      margin-top: 10px;
+      padding: 10px;
+      background: #0e0e10;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+
+    .settings label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .settings input[type="number"] {
+      width: 60px;
+      padding: 4px 8px;
+      background: #18181b;
+      border: 1px solid #464649;
+      border-radius: 4px;
+      color: #efeff1;
+      font-size: 12px;
+    }
+
+    .streamers-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+    }
+
+    .streamer-card {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-left: 4px solid #464649;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .streamer-card.live {
+      border-left-color: #eb0400;
+      background: #1a1625;
+    }
+
+    .streamer-card:hover {
+      background: #1f1f23;
+    }
+
+    .streamer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .streamer-name {
+      font-weight: bold;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #464649;
+    }
+
+    .status-indicator.live {
+      background: #eb0400;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .remove-btn {
+      background: #eb0400;
+      border: none;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .remove-btn:hover {
+      background: #c20400;
+    }
+
+    .streamer-info {
+      font-size: 12px;
+      color: #adadb8;
+      margin-bottom: 4px;
+    }
+
+    .live-info {
+      background: #eb0400;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      display: inline-block;
+      margin-top: 4px;
+    }
+
+    .chat-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #0e0e10;
+      z-index: 1000;
+      display: none;
+      flex-direction: column;
+    }
+
+    .chat-container.active {
+      display: flex;
+    }
+
+    .chat-header {
+      background: #18181b;
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #9147ff;
+    }
+
+    .chat-header h2 {
+      font-size: 16px;
+      color: #9147ff;
+    }
+
+    .back-btn {
+      background: #464649;
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .back-btn:hover {
+      background: #53535f;
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      background: #0e0e10;
+    }
+
+    .chat-message {
+      margin-bottom: 8px;
+      padding: 6px;
+      border-radius: 4px;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .chat-message .username {
+      font-weight: bold;
+      color: #9147ff;
+      margin-right: 4px;
+    }
+
+    .chat-message .text {
+      color: #efeff1;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #adadb8;
+    }
+
+    .empty-state i {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .footer {
+      background: #18181b;
+      padding: 12px;
+      border-top: 1px solid #464649;
+      font-size: 11px;
+      color: #adadb8;
+    }
+
+    .footer .title {
+      font-weight: bold;
+      color: #9147ff;
+      margin-bottom: 6px;
+    }
+
+    .footer a {
+      color: #9147ff;
+      text-decoration: none;
+      margin-right: 10px;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #18181b;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #464649;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #53535f;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1><i class="nf nf-md-twitch"></i> TwitchHelper</h1>
+    <div class="add-streamer">
+      <input type="text" id="usernameInput" placeholder="Enter streamer username...">
+      <button id="addBtn"><i class="nf nf-fa-plus"></i> Add</button>
+    </div>
+    <div class="settings">
+      <label>
+        <i class="nf nf-fa-clock_o"></i>
+        Check interval:
+        <input type="number" id="intervalInput" min="10" value="30"> sec
+      </label>
+    </div>
+  </div>
+
+  <div class="streamers-list" id="streamersList">
+    <div class="empty-state">
+      <i class="nf nf-fa-user_plus"></i>
+      <p>Add your favorite streamers to get started!</p>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="title">Made by MalikHw</div>
+    <div>
+      <a href="https://www.youtube.com/@MalikHw47" target="_blank"><i class="nf nf-md-youtube"></i> YouTube</a>
+      <a href="https://www.twitch.tv/MalikHw47" target="_blank"><i class="nf nf-md-twitch"></i> Twitch</a>
+      <a href="https://github.com/MalikHw" target="_blank"><i class="nf nf-fa-github"></i> GitHub</a>
+      <a href="https://throne.com/MalikHw47" target="_blank"><i class="nf nf-fa-gift"></i> Gift</a>
+    </div>
+  </div>
+
+  <div class="chat-container" id="chatContainer">
+    <div class="chat-header">
+      <h2 id="chatTitle"><i class="nf nf-fa-comments"></i> Chat</h2>
+      <button class="back-btn" id="backBtn"><i class="nf nf-fa-arrow_left"></i> Back</button>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

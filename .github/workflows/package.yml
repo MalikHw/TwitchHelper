@@ -1,0 +1,86 @@
+name: Package Extension
+
+on:
+  push:
+    paths:
+      - 'manifest.json'
+  workflow_dispatch:
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    - name: Extract version from manifest
+      id: version
+      run: |
+        VERSION=$(jq -r '.version' manifest.json)
+        echo "base_version=v$VERSION" >> $GITHUB_OUTPUT
+        
+        # Check if tag exists and find next available suffix
+        TAG="v$VERSION"
+        SUFFIX=0
+        
+        while git ls-remote --tags origin | grep -q "refs/tags/$TAG"; do
+          SUFFIX=$((SUFFIX + 1))
+          TAG="v$VERSION-$SUFFIX"
+        done
+        
+        echo "version=$TAG" >> $GITHUB_OUTPUT
+        echo "📦 Using tag: $TAG"
+    
+    - name: Create Chrome package
+      run: |
+        mkdir -p dist/chrome
+        # Copy all files except excluded ones
+        rsync -av --exclude='firefox-*' --exclude='dist' --exclude='.git' --exclude='.github' --exclude='*.md' --exclude='screenshot*.png' . dist/chrome/
+        cd dist/chrome
+        zip -r ../twitchhelper-chrome.zip .
+    
+    - name: Create Firefox package
+      run: |
+        mkdir -p dist/firefox
+        # Copy all files except excluded ones
+        rsync -av --exclude='firefox-*' --exclude='dist' --exclude='.git' --exclude='.github' --exclude='*.md' --exclude='screenshot*.png' . dist/firefox/
+        # Override with Firefox-specific files
+        cp firefox-manifest.json dist/firefox/manifest.json
+        cp firefox-background.js dist/firefox/background.js
+        cp firefox-popup.js dist/firefox/popup.js
+        cd dist/firefox
+        zip -r ../twitchhelper-firefox.zip .
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: extension-packages
+        path: |
+          dist/twitchhelper-chrome.zip
+          dist/twitchhelper-firefox.zip
+
+    - name: Create Git tag
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git tag ${{ steps.version.outputs.version }}
+        git push origin ${{ steps.version.outputs.version }}
+
+    - name: Create Auto Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.version.outputs.version }}
+        name: Auto Build Update
+        body: "...idk? Read the main README.md?💀"
+        files: |
+          dist/twitchhelper-chrome.zip
+          dist/twitchhelper-firefox.zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
